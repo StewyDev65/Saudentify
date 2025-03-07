@@ -141,11 +141,11 @@ System.out.println("\nResult: " + result);
 
 ## 🔮 Future Improvements
 
-- [ ] Add support for additional audio formats
-- [ ] Implement a graphical user interface
-- [ ] Optimize the fingerprinting algorithm for better accuracy
-- [ ] Add cloud storage for the fingerprint database
-- [ ] Implement streaming audio identification
+- [⬛] Add support for additional audio formats
+- [✔️] Implement a graphical user interface
+- [⬛] Optimize the fingerprinting algorithm for better accuracy
+- [⬛] Add cloud storage for the fingerprint database
+- [⬛] Implement streaming audio identification
 
 ## 📝 License
 

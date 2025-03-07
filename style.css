@@ -1,0 +1,105 @@
+/* Base styling */
+.root {
+    -fx-font-family: "System";
+    -fx-font-size: 12px;
+    -fx-background-color: #f5f5f5;
+}
+
+/* Navigation buttons */
+.nav-button {
+    -fx-background-color: #e0e0ff;
+    -fx-background-radius: 5;
+    -fx-font-weight: normal;
+    -fx-font-size: 13px;
+    -fx-text-fill: #000066;
+    -fx-padding: 8px;
+}
+
+.nav-button:hover {
+    -fx-background-color: #ccccff;
+    -fx-cursor: hand;
+}
+
+.nav-button:pressed {
+    -fx-background-color: #9999ff;
+}
+
+/* Action buttons */
+.action-button {
+    -fx-background-color: #3366cc;
+    -fx-background-radius: 5;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 8px;
+}
+
+.action-button:hover {
+    -fx-background-color: #4477dd;
+    -fx-cursor: hand;
+}
+
+.action-button:pressed {
+    -fx-background-color: #2255bb;
+}
+
+/* Record button */
+.record-button {
+    -fx-background-color: #cc3333;
+    -fx-background-radius: 5;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 10px;
+}
+
+.record-button:hover {
+    -fx-background-color: #dd4444;
+    -fx-cursor: hand;
+}
+
+.record-button:pressed {
+    -fx-background-color: #bb2222;
+}
+
+/* Table styling */
+.table-view {
+    -fx-background-color: white;
+    -fx-background-radius: 5;
+    -fx-border-color: #cccccc;
+    -fx-border-radius: 5;
+}
+
+.table-view .column-header {
+    -fx-background-color: #e6e6ff;
+    -fx-font-weight: bold;
+}
+
+.table-view .table-row-cell:odd {
+    -fx-background-color: #f8f8ff;
+}
+
+.table-view .table-row-cell:selected {
+    -fx-background-color: #3366cc;
+    -fx-text-fill: white;
+}
+
+/* Text fields */
+.text-field {
+    -fx-background-color: white;
+    -fx-background-radius: 3;
+    -fx-border-color: #cccccc;
+    -fx-border-radius: 3;
+    -fx-padding: 5px;
+}
+
+.text-field:focused {
+    -fx-border-color: #3366cc;
+}
+
+/* Sliders */
+.slider .track {
+    -fx-background-color: #e0e0e0;
+}
+
+.slider .thumb {
+    -fx-background-color: #3366cc;
+}
