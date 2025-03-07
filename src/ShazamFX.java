@@ -1,9 +1,12 @@
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -205,8 +208,16 @@ public class ShazamFX extends Application {
         songsTable = new TableView<>();
         songsTable.setPlaceholder(new Label("No songs in library"));
 
-        TableColumn<SongEntry, String> idCol = new TableColumn<>("ID");
-        idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
+        // Create ID column with integer sorting
+        TableColumn<SongEntry, Integer> idCol = new TableColumn<>("ID");
+        idCol.setCellValueFactory(cellData -> {
+            String idString = cellData.getValue().getId();
+            try {
+                return new ReadOnlyObjectWrapper<>(Integer.parseInt(idString));
+            } catch (NumberFormatException e) {
+                return new ReadOnlyObjectWrapper<>(0);
+            }
+        });
         idCol.setPrefWidth(50);
 
         TableColumn<SongEntry, String> nameCol = new TableColumn<>("Song Name");
@@ -218,7 +229,18 @@ public class ShazamFX extends Application {
         pathCol.setPrefWidth(300);
 
         songsTable.getColumns().addAll(idCol, nameCol, pathCol);
-        songsTable.setItems(songsList);
+
+        // Create a filtered list that will be displayed in the table
+        FilteredList<SongEntry> filteredData = new FilteredList<>(songsList, p -> true);
+
+        // Create a sorted list wrapped around the filtered list
+        SortedList<SongEntry> sortedData = new SortedList<>(filteredData);
+
+        // Bind the sorted list comparator to the TableView comparator
+        sortedData.comparatorProperty().bind(songsTable.comparatorProperty());
+
+        // Set the sorted (and filtered) data as items for the table
+        songsTable.setItems(sortedData);
 
         // Search field
         HBox searchBox = new HBox();
@@ -229,8 +251,29 @@ public class ShazamFX extends Application {
         searchField.setPromptText("Search songs...");
         searchField.setPrefWidth(300);
 
+        // Add listener to searchField text property to update the filter predicate
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+            filteredData.setPredicate(song -> {
+                // If filter text is empty, display all songs
+                if (newValue == null || newValue.isEmpty()) {
+                    return true;
+                }
+
+                // Compare song name with filter text
+                String lowerCaseFilter = newValue.toLowerCase();
+
+                if (song.getName().toLowerCase().contains(lowerCaseFilter)) {
+                    return true; // Filter matches song name
+                }
+                return false; // Does not match
+            });
+        });
+
         Button refreshBtn = new Button("Refresh");
-        refreshBtn.setOnAction(e -> refreshSongsList());
+        refreshBtn.setOnAction(e -> {
+            searchField.clear(); // Clear search when refreshing
+            refreshSongsList();
+        });
 
         searchBox.getChildren().addAll(new Label("Search:"), searchField, refreshBtn);
 
