@@ -22,6 +22,10 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import javax.sound.sampled.AudioFileFormat;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -638,7 +642,27 @@ public class ShazamFX extends Application {
         Task<Boolean> task = new Task<>() {
             @Override
             protected Boolean call() throws Exception {
-                return fingerprinter.addSong(filePath, songName);
+                // For MP3 files, try converting to WAV first (like in your console app)
+                File tempFile = null;
+                String fileToProcess = filePath;
+
+                try {
+                    if (filePath.toLowerCase().endsWith(".mp3")) {
+                        updateMessage("Converting MP3 to WAV format...");
+                        tempFile = convertMp3ToWav(new File(filePath));
+                        if (tempFile != null) {
+                            fileToProcess = tempFile.getAbsolutePath();
+                        }
+                    }
+
+                    // Now process the file (either original or converted)
+                    return fingerprinter.addSong(fileToProcess, songName);
+                } finally {
+                    // Clean up temp file if it was created
+                    if (tempFile != null && tempFile.exists()) {
+                        tempFile.delete();
+                    }
+                }
             }
 
             @Override
@@ -703,17 +727,32 @@ public class ShazamFX extends Application {
                         } else if (isAudioFile(file.getName())) {
                             String fileName = file.getName();
                             String songName = fileName.substring(0, fileName.lastIndexOf('.'));
+                            String filePath = file.getAbsolutePath();
+                            File tempFile = null;
 
-                            // In a real implementation, you would extract metadata if useMetadata is true
+                            try {
+                                // For MP3 files, convert to WAV first
+                                if (filePath.toLowerCase().endsWith(".mp3")) {
+                                    updateMessage("Converting: " + fileName);
+                                    tempFile = convertMp3ToWav(file);
+                                    if (tempFile != null) {
+                                        filePath = tempFile.getAbsolutePath();
+                                    }
+                                }
 
-                            updateMessage("Processing: " + fileName);
-                            if (fingerprinter.addSong(file.getAbsolutePath(), songName)) {
-                                count++;
+                                updateMessage("Processing: " + fileName);
+                                if (fingerprinter.addSong(filePath, songName)) {
+                                    count++;
+                                }
+                            } finally {
+                                // Clean up temp file
+                                if (tempFile != null && tempFile.exists()) {
+                                    tempFile.delete();
+                                }
                             }
                         }
                     }
                 }
-
                 return count;
             }
 
@@ -830,7 +869,43 @@ public class ShazamFX extends Application {
         }
     }
 
+    // Add this method from your console app
+    private File convertMp3ToWav(File mp3File) {
+        try {
+            // Create temp file for WAV output
+            File wavFile = File.createTempFile("temp_", ".wav");
+
+            // Get AudioInputStream from MP3 file
+            AudioInputStream mp3Stream = AudioSystem.getAudioInputStream(mp3File);
+            AudioFormat baseFormat = mp3Stream.getFormat();
+
+            // Convert to PCM format that can be processed
+            AudioFormat targetFormat = new AudioFormat(
+                    AudioFormat.Encoding.PCM_SIGNED,
+                    baseFormat.getSampleRate(),
+                    16,
+                    baseFormat.getChannels(),
+                    baseFormat.getChannels() * 2,
+                    baseFormat.getSampleRate(),
+                    false);
+
+            AudioInputStream pcmStream = AudioSystem.getAudioInputStream(targetFormat, mp3Stream);
+
+            // Write to WAV file
+            AudioSystem.write(pcmStream, AudioFileFormat.Type.WAVE, wavFile);
+
+            // Close streams
+            pcmStream.close();
+            mp3Stream.close();
+
+            return wavFile;
+        } catch (Exception e) {
+            System.out.println("Error converting MP3 to WAV: " + e.getMessage());
+            return null;
+        }
+    }
+
     public static void main(String[] args) {
         launch(args);
     }
-    }
+}
