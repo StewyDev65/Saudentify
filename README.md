@@ -28,8 +28,8 @@ Saudentify can create fingerprints from audio files, store them in a database, a
 
 1. Clone this repository
    ```bash
-   git clone https://github.com/yourusername/saudentify.git
-   cd saudentify
+   git clone https://github.com/StewyDev65/Saudentify.git
+   cd Saudentify
    ```
 
 2. Build with Maven
